@@ -208,5 +208,5 @@ function main(): void {
 }
 
 function sendTestMessageToSlack(): void {
-  postToSlack('This is a test mesage from gas-github-issue-checker.')
+  postToSlack('This is a test message from gas-github-issue-checker.')
 }
