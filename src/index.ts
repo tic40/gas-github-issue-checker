@@ -40,28 +40,26 @@ const queryFetchIssues = ({
           hasNextPage \
           hasPreviousPage \
         } \
-        edges { \
-          node { \
-            title \
-            url \
-            state \
-            publishedAt \
-            lastEditedAt \
-            createdAt \
-            updatedAt \
-            closedAt \
-            author { \
+        nodes { \
+          title \
+          url \
+          state \
+          publishedAt \
+          lastEditedAt \
+          createdAt \
+          updatedAt \
+          closedAt \
+          author { \
+            resourcePath \
+          } \
+          assignees(first: 5) { \
+            nodes { \
               resourcePath \
             } \
-            assignees(first: 5) { \
-              nodes { \
-                resourcePath \
-              } \
-            } \
-            labels(first: 5) { \
-              nodes { \
-                name \
-              } \
+          } \
+          labels(first: 5) { \
+            nodes { \
+              name \
             } \
           } \
         } \
@@ -82,7 +80,7 @@ const fetchIssues = ({ queryArgs, recursive = false }: { queryArgs: any, recursi
     if (pageInfo.hasNextPage) {
       queryArgs.cursor = pageInfo.endCursor
       const next: any[] = fetchIssues({ queryArgs, recursive })
-      res.data.repository.issues.edges = res.data.repository.issues.edges.concat(next.edges)
+      res.data.repository.issues.nodes = res.data.repository.issues.nodes.concat(next.nodes)
     }
   }
   return res.data.repository.issues
@@ -100,24 +98,24 @@ const formatMessage = ({ title, issues }: { title: string, issues: any[] }): str
 
 const createBaseIssueMessage = (issue: any): string => {
   const separator: string = ', '
-  const labels: string = issue.node.labels.nodes.map((label) => label.name).join(separator)
-  const assignees: string = issue.node.assignees.nodes.map((assignee) => `@${assignee.resourcePath.slice(1)}`).join(separator)
+  const labels: string = issue.labels.nodes.map((label) => label.name).join(separator)
+  const assignees: string = issue.assignees.nodes.map((assignee) => `@${assignee.resourcePath.slice(1)}`).join(separator)
   return [
     '```',
-    `Title: ${issue.node.title}`,
-    `Url: ${issue.node.url}`,
-    `Author: @${issue.node.author.resourcePath.slice(1)}`,
+    `Title: ${issue.title}`,
+    `Url: ${issue.url}`,
+    `Author: @${issue.author.resourcePath.slice(1)}`,
     assignees ? `Assignees: ${assignees}` : null,
     labels ? `Labels: ${labels}` : null,
-    `CreatedAt: ${issue.node.createdAt}`,
-    // `UpdatedAt: ${issue.node.updatedAt}`,
-    issue.node.closedAt ? `ClosedAt: ${issue.node.closedAt}` : null,
+    `CreatedAt: ${issue.createdAt}`,
+    // `UpdatedAt: ${issue.updatedAt}`,
+    issue.closedAt ? `ClosedAt: ${issue.closedAt}` : null,
     '```',
   ].filter((v) => v).join('\n')
 }
 
 const createMessageNoAssigneeIssue = (openIssues: any[]): string => {
-  const filteredIssues: any[] = openIssues.filter((issue) => issue.node.assignees.nodes.length === 0)
+  const filteredIssues: any[] = openIssues.filter((issue) => issue.assignees.nodes.length === 0)
   return formatMessage({
     issues: filteredIssues,
     title: ':thinking_face:Issues no one assigned.',
@@ -125,7 +123,7 @@ const createMessageNoAssigneeIssue = (openIssues: any[]): string => {
 }
 
 const createMessageOldIssue = (openIssues: any[]): string => {
-  const filteredIssues: any[] = openIssues.filter((issue) => !inDays(issue.node.createdAt, OLD_ISSUE_DAYS))
+  const filteredIssues: any[] = openIssues.filter((issue) => !inDays(issue.createdAt, OLD_ISSUE_DAYS))
   return formatMessage({
     issues: filteredIssues,
     title: `:tired_face:Issues have not been solved more than ${OLD_ISSUE_DAYS} days.`,
@@ -133,7 +131,7 @@ const createMessageOldIssue = (openIssues: any[]): string => {
 }
 
 const createMessageRecentClosedIssue = (closedIssues: any[]): string => {
-  const filteredIssues: any[] = closedIssues.filter((issue) => inDays(issue.node.closedAt, RECENT_CLOSED_ISSUE_DAYS))
+  const filteredIssues: any[] = closedIssues.filter((issue) => inDays(issue.closedAt, RECENT_CLOSED_ISSUE_DAYS))
   return formatMessage({
     issues: filteredIssues,
     title: `:+1:Issues have been closed within ${RECENT_CLOSED_ISSUE_DAYS} days.`,
@@ -197,9 +195,9 @@ function main(): void {
     `*Target repository:* https://github.com/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}`,
     `*Total open issue: ${openIssues.totalCount}*`,
   ].join('\n')
-  const messageNoAssigneeIssue: string = createMessageNoAssigneeIssue(openIssues.edges)
-  const messageOldIssue: string = createMessageOldIssue(openIssues.edges)
-  const messageRecentClosedIssue: string = createMessageRecentClosedIssue(closedIssues.edges)
+  const messageNoAssigneeIssue: string = createMessageNoAssigneeIssue(openIssues.nodes)
+  const messageOldIssue: string = createMessageOldIssue(openIssues.nodes)
+  const messageRecentClosedIssue: string = createMessageRecentClosedIssue(closedIssues.nodes)
 
   postToSlack(firstMessage)
   postToSlack(messageNoAssigneeIssue)
