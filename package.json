@@ -1,0 +1,17 @@
+{
+  "name": "gas-github",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "clasp push",
+    "lint": "tslint ./src/**/*.ts"
+  },
+  "devDependencies": {
+    "@google/clasp": "^1.6.3",
+    "tslint": "^5.11.0"
+  },
+  "dependencies": {
+    "@types/google-apps-script": "^0.0.32"
+  }
+}
