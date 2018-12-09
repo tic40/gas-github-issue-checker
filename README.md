@@ -14,3 +14,7 @@ This tool make GitHub issue reports and send it to your Slack channel.
     - open issues that no one assigned.
     - open issues that have not been solved within N days.
     - closed issues within N days.
+
+## Demo 
+
+![image](img/capture1.png)
