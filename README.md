@@ -1,10 +1,10 @@
 # gas-github-issue-checker
 
-A tool of Google App Script.
+A tool by Google App Script.
 
 ## Description
 
-This tool make GitHub issue reports and send it to your Slack channel.
+This tool makes GitHub issue reports and send it to your Slack channel.
 
 ## Feature
 
