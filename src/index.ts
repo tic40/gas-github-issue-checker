@@ -93,7 +93,7 @@ const formatMessage = ({ title, issues }: { title: string, issues: any[] }): str
   return [
     `*${title}*`,
     `*Total Count: ${issues.length}*`,
-    issues.length > 0 ? `Issue details below up to ${displayIssueMaxCount}` : null,
+    issues.length > 0 ? `Issue details below(up to ${displayIssueMaxCount})` : null,
     issues.slice(0, displayIssueMaxCount).map((issue) => createBaseIssueMessage(issue)).join('\n'),
   ].filter(v => v).join('\n')
 }
@@ -136,7 +136,7 @@ const createMessageRecentClosedIssue = (closedIssues: any[]): string => {
   const filteredIssues: any[] = closedIssues.filter((issue) => inDays(issue.node.closedAt, RECENT_CLOSED_ISSUE_DAYS))
   return formatMessage({
     issues: filteredIssues,
-    title: `:+1:Issues have been closed within ${RECENT_CLOSED_ISSUE_DAYS} days. (can count up to 100)`,
+    title: `:+1:Issues have been closed within ${RECENT_CLOSED_ISSUE_DAYS} days.`,
   })
 }
 
@@ -172,7 +172,7 @@ const fetchFromGitHub = (query: string) => {
   )
 }
 
-const main = (): void => {
+function main(): void {
   const openIssues: any[] = fetchIssues({
     queryArgs: {
       cursor: null,
@@ -193,7 +193,7 @@ const main = (): void => {
   })
 
   const firstMessage: string = [
-    '*:sunglasses:This is a regular report of the GitHub issue.*\n',
+    '*This is a regular report of the GitHub issue.*\n',
     `*Target repository:* https://github.com/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}`,
     `*Total open issue: ${openIssues.totalCount}*`,
   ].join('\n')
@@ -207,6 +207,6 @@ const main = (): void => {
   postToSlack(messageRecentClosedIssue)
 }
 
-function test(): void {
-  const res = main()
+function sendTestMessageToSlack(): void {
+  postToSlack('This is a test mesage from gas-github-issue-checker.')
 }
