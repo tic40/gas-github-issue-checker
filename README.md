@@ -15,6 +15,22 @@ This tool makes GitHub issue reports and send it to your Slack channel.
     - open issues that have not been solved within N days.
     - closed issues within N days.
 
-## Demo 
+## Setup
+
+```
+$ yarn install
+$ yarn clasp create {project name} --rootDir ./src
+```
+
+## deploy
+
+```
+$ yarn deploy
+```
+
+And must set the script properties in the GAS project.
+The properties are in src/index.ts. Please refer it.
+
+## Demo
 
 ![image](img/capture1.png)
