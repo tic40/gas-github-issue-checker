@@ -87,13 +87,13 @@ const fetchIssues = ({ queryArgs, recursive = false }: { queryArgs: any, recursi
 }
 
 const formatMessage = ({ title, issues }: { title: string, issues: any[] }): string => {
-  const displayIssueMaxCount: number = 20
+  const displayIssueMaxCount: number = 30
   return [
     `*${title}*`,
     `*Total Count: ${issues.length}*`,
     issues.length > 0 ? `Issue details below(up to ${displayIssueMaxCount})` : null,
     issues.slice(0, displayIssueMaxCount).map((issue) => createBaseIssueMessage(issue)).join('\n'),
-  ].filter(v => v).join('\n')
+  ].filter((v) => v).join('\n')
 }
 
 const createBaseIssueMessage = (issue: any): string => {
