@@ -14,6 +14,7 @@ const GITHUB_GRAPHQL_API_MAX_LIMIT: number = 100
 
 const OLD_ISSUE_DAYS: number = Number(properties.getProperty('OLD_ISSUE_DAYS')) || 60
 const RECENT_CLOSED_ISSUE_DAYS: number = Number(properties.getProperty('RECENT_CLOSED_ISSUE_DAYS')) || 1
+const DISPLAY_ISSUE_MAX_NUMBER: number = Number(properties.getProperty('DISPLAY_ISSUE_MAX_NUMBER')) || 50
 
 const inDays = (dateString: string, days: number): boolean => {
   const comparisonDate = new Date()
@@ -87,29 +88,27 @@ const fetchIssues = ({ queryArgs, recursive = false }: { queryArgs: any, recursi
 }
 
 const formatMessage = ({ title, issues }: { title: string, issues: any[] }): string => {
-  const displayIssueMaxCount: number = 30
   return [
     `*${title}*`,
     `*Total Count: ${issues.length}*`,
-    issues.length > 0 ? `Issue details below(up to ${displayIssueMaxCount})` : null,
-    issues.slice(0, displayIssueMaxCount).map((issue) => createBaseIssueMessage(issue)).join('\n'),
+    issues.length > DISPLAY_ISSUE_MAX_NUMBER ? `Display details up to ${DISPLAY_ISSUE_MAX_NUMBER}.` : null,
+    issues.slice(0, DISPLAY_ISSUE_MAX_NUMBER).map((issue) => createBaseIssueMessage(issue)).join('\n'),
   ].filter((v) => v).join('\n')
 }
 
 const createBaseIssueMessage = (issue: any): string => {
-  const separator: string = ', '
+  const separator: string = ' '
   const labels: string = issue.labels.nodes.map((label) => label.name).join(separator)
   const assignees: string = issue.assignees.nodes.map((assignee) => `@${assignee.resourcePath.slice(1)}`).join(separator)
   return [
     '```',
-    `Title: ${issue.title}`,
-    `Url: ${issue.url}`,
+    `<${issue.url}|${issue.title}>`,
     `Author: @${issue.author.resourcePath.slice(1)}`,
     assignees ? `Assignees: ${assignees}` : null,
     labels ? `Labels: ${labels}` : null,
     `CreatedAt: ${issue.createdAt}`,
     // `UpdatedAt: ${issue.updatedAt}`,
-    issue.closedAt ? `ClosedAt: ${issue.closedAt}` : null,
+    // issue.closedAt ? `ClosedAt: ${issue.closedAt}` : null,
     '```',
   ].filter((v) => v).join('\n')
 }
@@ -190,10 +189,11 @@ function main(): void {
     recursive: false,
   })
 
+  const repository: string = `${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}`
   const firstMessage: string = [
-    '*This is a regular report of the GitHub issue.*\n',
-    `*Target repository:* https://github.com/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}`,
-    `*Total open issue: ${openIssues.totalCount}*`,
+    '*GitHub issue report.*\n',
+    `*Target repository:* <https://github.com/${repository}|${repository}>`,
+    `*Total open issue: <https://github.com/${repository}/issues?q=is%3Aopen+is%3Aissue|${openIssues.totalCount}>*`,
   ].join('\n')
   const messageNoAssigneeIssue: string = createMessageNoAssigneeIssue(openIssues.nodes)
   const messageOldIssue: string = createMessageOldIssue(openIssues.nodes)
